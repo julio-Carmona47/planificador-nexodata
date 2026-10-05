@@ -56,18 +56,60 @@ de contexto.
 
 | nocturno.csv | Retorno medio | Espera media | Respuesta media | Cambios de contexto |
 |---|---|---|---|---|
-| FCFS | | | | |
-| SJF | | | | |
-| RR q=1 | | | | |
-| RR q=2 | | | | |
-| RR q=4 | | | | |
+| FCFS         |      14.00    |    10.00     |      10.00      |        5            |
+| SJF          |      11.67    |    7.67      |      7.67       |        5            |
+| RR q=1       |      12.33    |    8.33      |      1.50       |        22           |
+| RR q=2       |      12.17    |    8.17      |      2.83       |        11           |
+| RR q=4       |      14.50    |    10.50     |      6.17       |        8            |
 
-1. [Respuesta 1]
-2. [Respuesta 2]
-3. [Respuesta 3]
-4. [Respuesta 4]
-5. [Respuesta 5]
-6. [Respuesta 6, con la captura comentada de los estados de tu sistema]
+1. **¿Qué algoritmo da la menor espera media?** SJF, con 7.67 minutos.
+   Pasa antes los trabajos cortos (LOGS=1, INFORME=2, AVISOS=2) y deja
+   para el final los largos (BACKUP=6, RUTAS=4). Como esos cortos no
+   tienen que esperar detrás de FACTURA, su espera cae en picado y tira
+   de la media hacia abajo.
+
+2. **En FCFS, LOGS espera 14 minutos.** LOGS solo necesita 1 minuto pero
+   llega en t=3, cuando FACTURA (ráfaga 9) aún está en CPU y BACKUP
+   (ráfaga 6) espera en cola. Efecto **convoy**: un trabajo muy largo
+   bloquea la CPU y todos los que llegan detrás heredan su penalización
+   en cadena. El proceso culpable es FACTURA.
+
+3. **En SJF el peor parado es BACKUP** (espera 16, retorno 22). Si cada
+   pocos minutos llegasen trabajos cortos nuevos, BACKUP nunca llegaría
+   a ejecutarse: eso es **inanición (starvation)**. Se evita con
+   **envejecimiento (aging)**: subir progresivamente la prioridad de los
+   procesos que llevan mucho en cola.
+
+4. **Al bajar el quantum de 4 a 1**, la respuesta media cae de 6.17 a 1.50
+   (mejora enorme para el usuario interactivo) pero los cambios de
+   contexto se disparan de 8 a 22. Un quantum de 1 minuto no sería
+   realista en un SO real porque el cambio de contexto tiene coste: con
+   quantum de 1 ms el sistema pasaría más tiempo cambiando de proceso
+   que ejecutando.
+
+5. **RR q=4 (10.50) sale ligeramente peor que FCFS (10.00)** en espera
+   media. Sorprende, pero tiene sentido: RR reparte la penalización entre
+   todos, así que FACTURA (que en FCFS esperaba 0) ahora espera 15. Los
+   cortos mejoran algo, pero no lo suficiente para compensar. FCFS es
+   mejor en media cuando los largos van primero; RR gana en el peor caso.
+
+6. **El simulador nunca usa Bloqueado** porque solo modela ráfagas de CPU
+   puras, sin E/S. En un SO real (`Administrador de tareas → Detalles` en
+   Windows, o `ps -eo pid,stat,comm` en Linux) aparecen estados como
+   `Running` (equivalente a mi LISTO+EJECUCION), `Suspended` (equivalente
+   a mi BLOQUEADO, no simulado) y `Stopped`. Mi modelo es un subconjunto
+   simplificado: solo me interesa el reparto de CPU, no el ciclo completo
+   de vida de un proceso con E/S.
+
+![Estados de procesos en el SO](capturas/estados_so.png)
 
 ### Recomendación
-[De 5 a 10 líneas.]
+
+Para los trabajos nocturnos por lotes de NexoData usaría **SJF con
+envejecimiento**: da la menor espera media (7.67) y la menor media de
+retorno (11.67), y el envejecimiento evita que BACKUP se quede sin
+ejecutar cuando lleguen trabajos cortos nuevos. Si el servidor tuviera
+usuarios conectados (interactivos), cambiaría a **Round Robin con
+quantum ≈ 4** o al CFS de Linux: sacrifica algo de espera media pero
+reduce la respuesta media a unos pocos minutos, que es lo que percibe
+el usuario.
