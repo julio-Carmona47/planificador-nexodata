@@ -11,9 +11,6 @@ import java.util.List;
  * No cambies cómo se leen: el profesor ejecutará tu programa siempre así:
  *
  *   java planificador.Main <fichero.csv> <fcfs|sjf|rr|todos> [quantum] [--traza]
- *
- * Todo lo demás (modelo del proceso, lectura del CSV, algoritmos, métricas,
- * informe por consola...) lo diseñas y programas tú en este mismo paquete.
  */
 public class Main {
 
@@ -44,11 +41,25 @@ public class Main {
             System.exit(1);
         }
 
-        System.out.println("Fichero: " + fichero + " | algoritmo: " + algoritmo
-                + " | quantum: " + quantum + " | traza: " + traza);
+        // --- A partir de aquí, código del alumno ---
+        List<Proceso> procesos;
+        try {
+            procesos = LectorCSV.leer(fichero);
+        } catch (Exception e) {
+            System.err.println("Error leyendo " + fichero + ": " + e.getMessage());
+            System.exit(1);
+            return;
+        }
+        if (procesos.isEmpty()) {
+            System.err.println("El fichero no contiene procesos válidos.");
+            System.exit(1);
+        }
 
-        // TODO (tareas 1 a 3): a partir de aquí, lee los procesos del fichero,
-        // simula el algoritmo o algoritmos pedidos y muestra los resultados.
-        // Cuando lo tengas, borra el println de arriba y este comentario.
+        System.out.println("Leídos " + procesos.size() + " procesos:");
+        for (Proceso p : procesos) {
+            System.out.println("  " + p.getNombre()
+                    + " llegada=" + p.getLlegada()
+                    + " ráfaga=" + p.getRafaga());
+        }
     }
 }
