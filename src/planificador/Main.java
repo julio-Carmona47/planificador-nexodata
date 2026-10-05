@@ -4,14 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/**
- * PSP · Tema 2 · Simulador de planificación para NexoData
- *
- * Punto de entrada. Este fichero YA ESTÁ HECHO: solo lee y comprueba los argumentos.
- * No cambies cómo se leen: el profesor ejecutará tu programa siempre así:
- *
- *   java planificador.Main <fichero.csv> <fcfs|sjf|rr|todos> [quantum] [--traza]
- */
 public class Main {
 
     public static void main(String[] args) {
@@ -55,11 +47,28 @@ public class Main {
             System.exit(1);
         }
 
-        System.out.println("Leídos " + procesos.size() + " procesos:");
-        for (Proceso p : procesos) {
-            System.out.println("  " + p.getNombre()
-                    + " llegada=" + p.getLlegada()
-                    + " ráfaga=" + p.getRafaga());
+        if (quantum <= 0) {
+            System.err.println("El quantum debe ser > 0: " + quantum);
+            System.exit(1);
+        }
+
+        List<Planificador> algoritmos = new java.util.ArrayList<>();
+        switch (algoritmo) {
+            case "fcfs" -> algoritmos.add(new Fcfs(procesos));
+            case "sjf"  -> algoritmos.add(new Sjf(procesos));
+            case "rr"   -> algoritmos.add(new RoundRobin(procesos, quantum));
+            case "todos" -> {
+                algoritmos.add(new Fcfs(procesos));
+                algoritmos.add(new Sjf(procesos));
+                algoritmos.add(new RoundRobin(procesos, quantum));
+            }
+        }
+
+        boolean primero = true;
+        for (Planificador alg : algoritmos) {
+            if (!primero) System.out.println();
+            primero = false;
+            Informe.imprimir(alg.simular(), traza);
         }
     }
 }
