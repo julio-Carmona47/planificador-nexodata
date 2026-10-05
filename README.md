@@ -31,7 +31,24 @@ java -cp out planificador.Main datos/ejemplo_clase.csv rr 2 --traza
 
 ### 4.2 Comparación con el programa
 [¿Coincide? Si no coincidió en algún momento: quién se equivocaba, qué corregiste y enlace al commit.]
+### 4.2 Comparación con el programa
 
+Tras resolver el ejercicio a mano, ejecuté:
+
+    java -cp out planificador.Main datos/verificacion.csv fcfs
+    java -cp out planificador.Main datos/verificacion.csv rr 2
+
+**FCFS**: coincide exactamente con mi resolución manual. Gantt
+`P1 P1 P1 P1 P1 P1 P2 P2 P2 P2 P3 P3 P4 P4 P4 P4 P4 P5`, medias
+retorno 10.00, espera 6.40, respuesta 6.40, cambios de contexto 4.
+
+**RR q=2**: coincide exactamente con mi resolución manual. Gantt
+`P1 P1 P2 P2 P3 P3 P1 P1 P4 P4 P2 P2 P5 P1 P1 P4 P4 P4`, medias
+retorno 10.20, espera 6.60, respuesta 2.60, cambios de contexto 8.
+Comprobé que se respeta la Regla 3: en t=2, P3 entra en la cola
+ANTES de que P1 sea desalojado. Y la Regla 4: cuando un proceso
+agota el quantum y la cola está vacía, sigue en CPU sin cambio
+de contexto.
 ### 4.3 hueco.csv
 [Qué ocurre entre los instantes 2 y 5 y cómo lo refleja tu diagrama.]
 
